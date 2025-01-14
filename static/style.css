@@ -1,0 +1,330 @@
+/* style.css */
+
+/* Definición de variables para colores y estilos */
+:root {
+    --background-color: #1e1e2f; /* Fondo oscuro pastel */
+    --primary-color: #2a2a4a;    /* Fondo principal */
+    --secondary-color: #24243e;  /* Fondo secundario */
+    --accent-color: #f4a261;     /* Acuerdo pastel */
+    --button-bg: #f4a261;        /* Botones */
+    --button-hover-bg: #e76f51;  /* Hover en botones */
+    --text-color: #ffffff;        /* Texto principal */
+    --text-secondary-color: #b0b0c3; /* Texto secundario */
+    --border-color: #3e3e5e;      /* Bordes */
+    --font-family: 'Roboto', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Cambiado de center a flex-start */
+    min-height: 100vh;
+    padding-top: 20px; /* Espacio adicional para evitar que el header quede demasiado arriba */
+}
+
+.container {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    padding-bottom: 40px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--secondary-color); /* Añadido fondo al header */
+    border-bottom: 2px solid var(--border-color); /* Línea inferior para separar el header del contenido */
+    position: relative; /* Añadido para manejo de z-index */
+    z-index: 10; /* Asegura que el header esté por encima de otros elementos */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--accent-color);
+}
+
+nav a {
+    margin-left: 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: var(--button-hover-bg); /* Cambio de color al pasar el mouse */
+}
+
+/* Estilos para el botón de Historial */
+.btn-history {
+    background-color: var(--button-bg);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 0.9rem;
+    z-index: 20; /* Asegura que el botón esté por encima de otros elementos */
+}
+
+.btn-history:hover {
+    background-color: var(--button-hover-bg); /* Cambio de color al pasar el mouse */
+    transform: translateY(-2px);
+}
+
+.btn-history i {
+    margin-right: 8px;
+}
+
+main {
+    margin-top: 20px; /* Ajustado desde margin-top: 70px; si no se usa header fijo */
+    padding: 30px;
+}
+
+.section {
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.section h2 {
+    margin-bottom: 15px;
+    font-size: 1.6rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 5px;
+    color: var(--text-color);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+input[type="text"], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+input[type="text"]::placeholder, textarea::placeholder {
+    color: var(--text-secondary-color);
+}
+
+button {
+    background-color: var(--button-bg);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+button:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-2px);
+}
+
+.spinner {
+    margin: 20px auto;
+    border: 8px solid var(--secondary-color);
+    border-top: 8px solid var(--button-bg);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.responseBox {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--secondary-color);
+    min-height: 100px;
+    white-space: pre-wrap;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    text-align: left;
+    font-family: "Courier New", Courier, monospace;
+    overflow-y: auto;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+ul li:last-child {
+    border-bottom: none;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 30px 0;
+}
+
+footer {
+    margin-top: 20px;
+    text-align: center;
+    color: var(--text-secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Estilos para la tabla en historial.html */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--secondary-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+thead {
+    background-color: var(--button-bg);
+    color: #fff;
+}
+
+thead th {
+    padding: 12px;
+    text-align: left;
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--primary-color);
+}
+
+tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+tbody tr:hover {
+    background-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .section h2 {
+        font-size: 1.3rem;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        display: none;
+    }
+
+    tbody tr {
+        margin-bottom: 15px;
+    }
+
+    tbody td {
+        padding-left: 50%;
+        position: relative;
+    }
+
+    tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-left: 15px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+}
+
+/* Estilos para el botón de Inicio en historial.html */
+.btn-home {
+    background-color: var(--button-bg);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-home:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-2px);
+}
+
+.btn-home i {
+    margin-right: 8px;
+}

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ollama Web UI (Auto-Serve)</title>
+    <!-- Importar Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Importar Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Importar el CSS personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Meta para responsividad -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Ollama Web UI</h1>
+        <nav>
+            <!-- Botón de Historial -->
+            <a href="{{ url_for('historial') }}" class="btn btn-history">
+                <i class="fas fa-history"></i> Ver Historial
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Sección para descargar modelos -->
+        <section class="section">
+            <h2>Descargar / Registrar un Modelo</h2>
+            <form id="downloadForm">
+                <div class="form-group">
+                    <label for="nombre_modelo">Selecciona un modelo para descargar:</label>
+                    <select id="nombre_modelo" required>
+                        <option value="" disabled selected>-- Selecciona un modelo --</option>
+                        {% for modelo in modelos_disponibles %}
+                        <option value="{{ modelo }}">{{ modelo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit"><i class="fas fa-download"></i> Descargar</button>
+            </form>
+            <p id="downloadStatus"></p>
+        </section>
+
+        <hr>
+
+        <!-- Sección para listar modelos instalados -->
+        <section class="section">
+            <h2>Modelos Instalados</h2>
+            <ul>
+                {% for mod in modelos_ollama %}
+                <li>{{ mod }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <hr>
+
+        <!-- Sección para enviar prompts -->
+        <section class="section">
+            <h2>Enviar un Prompt</h2>
+            <form id="promptForm">
+                <div class="form-group">
+                    <label for="selectModelo">Modelo:</label>
+                    <select id="selectModelo" required>
+                        {% for mod in modelos_ollama %}
+                        <option value="{{ mod }}">{{ mod }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="prompt">Prompt:</label>
+                    <textarea id="prompt" rows="5" placeholder="Escribe tu prompt aquí..." required></textarea>
+                </div>
+                <button type="submit"><i class="fas fa-paper-plane"></i> Enviar Prompt</button>
+            </form>
+            <div id="spinner" class="spinner" style="display:none;"></div>
+            <!-- Cambiar de div con clase 'responseBox' a una con clase 'markdown-body' para estilos opcionales -->
+            <div id="respuesta" class="responseBox markdown-body"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Ollama Web UI. Todos los derechos reservados.</p>
+    </footer>
+</div>
+
+<!-- Importar Font Awesome JS (opcional para interactividad de iconos) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<!-- Importar Marked.js para procesar Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Scripts de JavaScript -->
+<script>
+document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const selectElem = document.getElementById("nombre_modelo");
+    const nombre = selectElem.value;
+    const statusElem = document.getElementById("downloadStatus");
+    if (!nombre) {
+        statusElem.textContent = "Por favor, selecciona un modelo.";
+        return;
+    }
+
+    statusElem.textContent = "Descargando, espera...";
+    const formData = new FormData();
+    formData.append("nombre_modelo", nombre);
+
+    try {
+        const resp = await fetch("{{ url_for('descargar_modelo') }}", {
+            method: "POST",
+            body: formData
+        });
+        const data = await resp.json();
+        if (resp.ok && data.ok) {
+            statusElem.textContent = "Modelo descargado con éxito.";
+            // Opcional: Recargar la lista de modelos instalados
+            location.reload();
+        } else {
+            statusElem.textContent = "Error: " + (data.error || "Desconocido");
+        }
+    } catch (error) {
+        statusElem.textContent = "Error de red: " + error;
+    }
+});
+
+document.getElementById('promptForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const modelo = document.getElementById("selectModelo").value;
+    const prompt = document.getElementById("prompt").value.trim();
+    const respuestaElem = document.getElementById("respuesta");
+    const spinnerElem = document.getElementById("spinner");
+
+    respuestaElem.innerHTML = ""; // Limpiar contenido anterior
+    if (!modelo || !prompt) {
+        respuestaElem.textContent = "Faltan datos: modelo o prompt vacío.";
+        return;
+    }
+
+    spinnerElem.style.display = "block";
+
+    try {
+        const formData = new FormData();
+        formData.append("modelo", modelo);
+        formData.append("prompt", prompt);
+
+        const resp = await fetch("{{ url_for('inferencia') }}", {
+            method: "POST",
+            body: formData
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+            respuestaElem.textContent = "Error HTTP: " + resp.status;
+        } else if (data.error) {
+            respuestaElem.textContent = "Error: " + data.error;
+        } else {
+            // Usar Marked.js para convertir Markdown a HTML
+            const htmlContent = marked.parse(data.respuesta);
+            respuestaElem.innerHTML = htmlContent +
+                `<p><em>Tiempo de procesamiento: ${data.duracion.toFixed(3)}s</em></p>`;
+        }
+    } catch (error) {
+        respuestaElem.textContent = "Error: " + error;
+    } finally {
+        spinnerElem.style.display = "none";
+    }
+});
+
+// Listener para detectar la tecla Enter en el textarea del prompt
+document.getElementById('prompt').addEventListener('keydown', function(event) {
+    // Verificamos si la tecla presionada es Enter sin la tecla Shift
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Previene la inserción de una nueva línea
+        document.getElementById('promptForm').dispatchEvent(new Event('submit')); // Envía el formulario
+    }
+});
+</script>
+
+<!-- Opcional: Importar estilos de GitHub Markdown para una mejor apariencia -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" integrity="sha512-PH0HBkeemXnH2eI6rX2uYN/K6m5zMX3+m5pqR4D1DXjTeBWJwgV8PRhif+TwXnqXOHimIQZOnIOEXmSgwZ6YwQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+/* Aplicar estilos de GitHub Markdown al contenedor de respuesta */
+.markdown-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 45px;
+}
+
+@media (max-width: 767px) {
+    .markdown-body {
+        padding: 15px;
+    }
+}
+</style>
+</body>
+</html>
