@@ -2,63 +2,68 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Historial de Prompts - Ollama Web UI</title>
+    <title>Historial - Ollama Web UI</title>
     <!-- Importar Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Importar Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Importar el CSS personalizado -->
+    <!-- Importar estilos personalizados -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Meta para responsividad -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Importar estilos de GitHub Markdown para una mejor apariencia -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" integrity="sha512-PH0HBkeemXnH2eI6rX2uYN/K6m5zMX3+m5pqR4D1DXjTeBWJwgV8PRhif+TwXnqXOHimIQZOnIOEXmSgwZ6YwQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body>
-<div class="container">
-    <header>
-        <h1>Historial de Prompts</h1>
-        <nav>
-            <a href="{{ url_for('index') }}" class="btn btn-home">
-                <i class="fas fa-home"></i> Inicio
-            </a>
-        </nav>
-    </header>
+<body class="body">
+    <div class="container">
+        <!-- Cabecera -->
+        <header class="header">
+            <h1 class="title">Historial de Prompts</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="btn btn-history">
+                    <i class="fas fa-home"></i> Volver al Inicio
+                </a>
+            </nav>
+        </header>
 
-    <main>
-        <section class="section">
-            <h2>Registro de Interacciones</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Modelo</th>
-                        <th>Prompt</th>
-                        <th>Respuesta</th>
-                        <th>Duración (s)</th>
-                        <th>Fecha</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for registro in registros %}
-                    <tr>
-                        <td data-label="ID">{{ registro[0] }}</td>
-                        <td data-label="Modelo">{{ registro[1] }}</td>
-                        <td data-label="Prompt">{{ registro[2] }}</td>
-                        <td data-label="Respuesta">{{ registro[3] }}</td>
-                        <td data-label="Duración (s)">{{ registro[4] }}</td>
-                        <td data-label="Fecha">{{ registro[5] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-    </main>
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <section class="section">
+                <h2 class="section-title">Registros de Prompts</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Modelo</th>
+                            <th>Prompt</th>
+                            <th>Respuesta</th>
+                            <th>Duración (s)</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in registros %}
+                        <tr>
+                            <td>{{ registro[0] }}</td>
+                            <td>{{ registro[1] }}</td>
+                            <td>{{ registro[2] }}</td>
+                            <td>{{ registro[3] }}</td>
+                            <td>{{ "%.3f" | format(registro[4]) }}</td>
+                            <td>{{ registro[5] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
 
-    <footer>
-        <p>&copy; 2025 Ollama Web UI. Todos los derechos reservados.</p>
-    </footer>
-</div>
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>&copy; 2025 Ollama Web UI. Todos los derechos reservados.</p>
+        </footer>
+    </div>
 
-<!-- Importar Font Awesome JS (opcional para interactividad de iconos) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Importar Font Awesome JS (opcional para interactividad de iconos) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>

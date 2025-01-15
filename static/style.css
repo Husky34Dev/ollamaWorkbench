@@ -1,175 +1,210 @@
-/* style.css */
-
-/* Definición de variables para colores y estilos */
-:root {
-    --background-color: #1e1e2f; /* Fondo oscuro pastel */
-    --primary-color: #2a2a4a;    /* Fondo principal */
-    --secondary-color: #24243e;  /* Fondo secundario */
-    --accent-color: #f4a261;     /* Acuerdo pastel */
-    --button-bg: #f4a261;        /* Botones */
-    --button-hover-bg: #e76f51;  /* Hover en botones */
-    --text-color: #ffffff;        /* Texto principal */
-    --text-secondary-color: #b0b0c3; /* Texto secundario */
-    --border-color: #3e3e5e;      /* Bordes */
-    --font-family: 'Roboto', sans-serif;
-}
-
-* {
-    box-sizing: border-box;
-}
-
-html, body {
+/* Fuente y Reset básico */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f3f4f6; /* bg-gray-100 */
     margin: 0;
     padding: 0;
-    font-family: var(--font-family);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    height: 100%;
-}
-
-body {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Cambiado de center a flex-start */
-    min-height: 100vh;
-    padding-top: 20px; /* Espacio adicional para evitar que el header quede demasiado arriba */
+    color: #1f2937; /* text-gray-800 */
 }
 
 .container {
-    max-width: 1000px;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: var(--primary-color);
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    padding-bottom: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px; /* p-4 */
+    min-height: 100vh; /* min-h-screen */
+    display: flex;
+    flex-direction: column;
 }
 
-header {
+/* Cabecera */
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
-    background-color: var(--secondary-color); /* Añadido fondo al header */
-    border-bottom: 2px solid var(--border-color); /* Línea inferior para separar el header del contenido */
-    position: relative; /* Añadido para manejo de z-index */
-    z-index: 10; /* Asegura que el header esté por encima de otros elementos */
+    margin-bottom: 32px; /* mb-8 */
 }
 
-header h1 {
-    margin: 0;
-    font-size: 1.8rem;
-    color: var(--accent-color);
+.title {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    color: #374151; /* text-gray-800 */
 }
 
-nav a {
-    margin-left: 20px;
-    color: var(--text-color);
-    text-decoration: none;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    transition: color 0.3s ease;
-}
-
-nav a:hover {
-    color: var(--button-hover-bg); /* Cambio de color al pasar el mouse */
-}
-
-/* Estilos para el botón de Historial */
 .btn-history {
-    background-color: var(--button-bg);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 4px;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    font-size: 0.9rem;
-    z-index: 20; /* Asegura que el botón esté por encima de otros elementos */
+    padding: 8px 16px; /* px-4 py-2 */
+    background-color: #1f2937; /* bg-gray-800 */
+    color: #ffffff;
+    border-radius: 4px; /* rounded-md */
+    text-decoration: none;
+    transition: background-color 0.3s;
 }
 
 .btn-history:hover {
-    background-color: var(--button-hover-bg); /* Cambio de color al pasar el mouse */
-    transform: translateY(-2px);
+    background-color: #374151; /* hover:bg-gray-700 */
 }
 
-.btn-history i {
-    margin-right: 8px;
-}
-
-main {
-    margin-top: 20px; /* Ajustado desde margin-top: 70px; si no se usa header fijo */
-    padding: 30px;
-}
-
+/* Secciones */
 .section {
-    margin-bottom: 40px;
-    text-align: left;
+    background-color: #ffffff; /* bg-white */
+    padding: 24px; /* p-6 */
+    border-radius: 8px; /* rounded-lg */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+    margin-bottom: 32px; /* mb-8 */
 }
 
-.section h2 {
-    margin-bottom: 15px;
-    font-size: 1.6rem;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-    color: var(--text-color);
+.section-title {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 600; /* font-semibold */
+    margin-bottom: 16px; /* mb-4 */
+    color: #4b5563; /* text-gray-700 */
+}
+
+/* Formularios */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* space-y-4 */
 }
 
 .form-group {
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: var(--text-color);
+.label {
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: #4b5563; /* text-gray-700 */
+    margin-bottom: 4px;
 }
 
-input[type="text"], textarea, select {
+.input,
+.select,
+.textarea {
+    padding: 12px; /* p-3 */
+    border: 1px solid #d1d5db; /* border-gray-300 */
+    border-radius: 4px; /* rounded-md */
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
     width: 100%;
-    padding: 10px 12px;
-    margin-top: 5px;
-    background-color: var(--secondary-color);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    font-size: 1rem;
 }
 
-input[type="text"]::placeholder, textarea::placeholder {
-    color: var(--text-secondary-color);
+.input:focus,
+.select:focus,
+.textarea:focus {
+    border-color: #6366f1; /* focus:ring-indigo-500 */
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
 }
 
-button {
-    background-color: var(--button-bg);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
+.autocomplete {
+    position: relative;
+}
+
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    background-color: #ffffff; /* bg-white */
+    border: 1px solid #d1d5db; /* border-gray-300 */
+    border-radius: 4px; /* rounded-md */
+    margin-top: 4px; /* mt-1 */
+    max-height: 240px; /* max-h-60 */
+    overflow-y: auto;
+}
+
+.suggestions.hidden {
+    display: none;
+}
+
+.suggestions li {
+    padding: 8px;
     cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.2s;
+}
+
+.suggestions li:hover {
+    background-color: #e0e7ff; /* hover:bg-indigo-100 */
+}
+
+.btn {
     display: inline-flex;
     align-items: center;
+    padding: 8px 16px; /* px-4 py-2 */
+    border: none;
+    border-radius: 4px; /* rounded-md */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    color: #ffffff;
+    text-decoration: none;
 }
 
-button:hover {
-    background-color: var(--button-hover-bg);
-    transform: translateY(-2px);
+.btn-download {
+    background-color: #4f46e5; /* bg-indigo-600 */
 }
 
+.btn-download:hover {
+    background-color: #4338ca; /* hover:bg-indigo-700 */
+}
+
+.btn-submit {
+    background-color: #4f46e5; /* bg-indigo-600 */
+}
+
+.btn-submit:hover {
+    background-color: #4338ca; /* hover:bg-indigo-700 */
+}
+
+.status {
+    margin-top: 8px; /* mt-2 */
+    font-size: 0.875rem; /* text-sm */
+    color: #6b7280; /* text-gray-600 */
+}
+
+.model-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.model-item {
+    padding: 12px; /* p-3 */
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 4px; /* rounded-md */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
+    color: #1f2937; /* text-gray-800 */
+}
+
+/* Spinner */
 .spinner {
-    margin: 20px auto;
-    border: 8px solid var(--secondary-color);
-    border-top: 8px solid var(--button-bg);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    display: flex;
+    justify-content: center;
+    margin-top: 16px; /* mt-4 */
+}
+
+.spinner.hidden {
+    display: none;
+}
+
+.spinner-icon {
     animation: spin 1s linear infinite;
+    height: 24px; /* h-6 */
+    width: 24px; /* w-6 */
+    color: #4f46e5; /* text-indigo-600 */
+}
+
+.spinner-circle {
+    opacity: 0.25;
+}
+
+.spinner-path {
+    opacity: 0.75;
 }
 
 @keyframes spin {
@@ -177,154 +212,91 @@ button:hover {
     100% { transform: rotate(360deg); }
 }
 
-.responseBox {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: var(--secondary-color);
-    min-height: 100px;
-    white-space: pre-wrap;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    text-align: left;
-    font-family: "Courier New", Courier, monospace;
-    overflow-y: auto;
+/* Respuesta */
+.respuesta {
+    margin-top: 16px; /* mt-4 */
+    padding: 16px; /* p-4 */
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 4px; /* rounded-md */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* shadow-md */
+    overflow: auto;
 }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-ul li {
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-color);
-}
-
-ul li:last-child {
-    border-bottom: none;
-}
-
-a {
-    color: var(--accent-color);
-    text-decoration: none;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-hr {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 30px 0;
-}
-
-footer {
-    margin-top: 20px;
+/* Pie de página */
+.footer {
     text-align: center;
-    color: var(--text-secondary-color);
-    font-size: 0.9rem;
+    color: #6b7280; /* text-gray-600 */
+    margin-top: 32px; /* mt-8 */
 }
 
-/* Estilos para la tabla en historial.html */
-table {
+/* Tabla para historial */
+.table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--secondary-color);
-    border-radius: 5px;
-    overflow: hidden;
 }
 
-thead {
-    background-color: var(--button-bg);
-    color: #fff;
+.table thead {
+    background-color: #e5e7eb; /* bg-gray-200 */
 }
 
-thead th {
+.table th,
+.table td {
     padding: 12px;
     text-align: left;
+    border-bottom: 1px solid #d1d5db; /* border-gray-300 */
 }
 
-tbody tr:nth-child(even) {
-    background-color: var(--primary-color);
+.table th {
+    font-weight: 600;
+    color: #4b5563; /* text-gray-700 */
 }
 
-tbody td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-color);
+.table tbody tr:hover {
+    background-color: #f3f4f6; /* bg-gray-100 */
 }
 
-tbody tr:hover {
-    background-color: var(--primary-color);
-}
-
+/* Responsividad */
 @media (max-width: 768px) {
-    .container {
-        padding: 10px;
+    .header,
+    .footer {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    header h1 {
-        font-size: 1.5rem;
+    .btn-history {
+        margin-top: 16px;
     }
 
-    .section h2 {
-        font-size: 1.3rem;
+    .model-list {
+        flex-direction: column;
     }
 
-    button {
-        width: 100%;
-        padding: 12px;
-    }
-
-    table, thead, tbody, th, td, tr {
-        display: block;
-    }
-
-    thead tr {
+    .table thead {
         display: none;
     }
 
-    tbody tr {
-        margin-bottom: 15px;
+    .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
     }
 
-    tbody td {
+    .table tr {
+        margin-bottom: 16px;
+    }
+
+    .table td {
+        text-align: right;
         padding-left: 50%;
         position: relative;
     }
 
-    tbody td::before {
+    .table td::before {
         content: attr(data-label);
         position: absolute;
         left: 0;
         width: 45%;
-        padding-left: 15px;
-        font-weight: bold;
-        white-space: nowrap;
+        padding-left: 12px;
+        font-weight: 600;
+        text-align: left;
     }
-}
-
-/* Estilos para el botón de Inicio en historial.html */
-.btn-home {
-    background-color: var(--button-bg);
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 4px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    font-size: 0.9rem;
-}
-
-.btn-home:hover {
-    background-color: var(--button-hover-bg);
-    transform: translateY(-2px);
-}
-
-.btn-home i {
-    margin-right: 8px;
 }

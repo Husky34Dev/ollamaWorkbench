@@ -7,6 +7,7 @@ import requests
 import json
 
 from flask import Flask, render_template, request, jsonify, url_for
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -14,6 +15,7 @@ app = Flask(__name__)
 #   CONFIGURACIÓN DE LA BASE DE DATOS
 # ---------------------------------------------------------------------
 DB_PATH = "data.db"
+
 
 def init_db():
     """
@@ -36,6 +38,7 @@ def init_db():
             )
         """)
 
+
 init_db()
 
 # ---------------------------------------------------------------------
@@ -52,11 +55,14 @@ ANSI_ESCAPE_RE = re.compile(
 # Para eliminar caracteres de spinner braille (⠙, ⠹, etc.)
 BRAILLE_SPINNER_RE = re.compile('[⠙⠹⠸⠼⠴⠦⠧⠇⠏⠋]+')
 
+
 def remove_ansi_sequences(text: str) -> str:
     return ANSI_ESCAPE_RE.sub('', text)
 
+
 def remove_braille_spinners(text: str) -> str:
     return BRAILLE_SPINNER_RE.sub('', text)
+
 
 def remove_repeated_pulling(text: str) -> str:
     lines = text.splitlines()
@@ -66,6 +72,7 @@ def remove_repeated_pulling(text: str) -> str:
             continue
         filtered.append(line)
     return "\n".join(filtered).strip()
+
 
 # ---------------------------------------------------------------------
 #   FUNCIONES SUBPROCESS: listar / pull
@@ -90,6 +97,7 @@ def listar_modelos_ollama():
             modelos.append(partes[0])
     return modelos
 
+
 def descargar_modelo_ollama(nombre_modelo: str):
     """
     Ejecuta 'ollama pull <nombre_modelo>'.
@@ -98,7 +106,7 @@ def descargar_modelo_ollama(nombre_modelo: str):
     """
     existentes = listar_modelos_ollama()
     if nombre_modelo in existentes:
-        return False, f"El modelo '{nombre_modelo}' ya está descargado."
+        return False, f"Ya tienes el modelo '{nombre_modelo}'."
 
     comando = ["ollama", "pull", nombre_modelo]
     resultado = subprocess.run(comando, capture_output=True, text=True)
@@ -111,17 +119,6 @@ def descargar_modelo_ollama(nombre_modelo: str):
         stderr_limpio = remove_repeated_pulling(stderr_limpio)
         return False, stderr_limpio
 
-# ---------------------------------------------------------------------
-#   LISTA DE MODELOS DISPONIBLES PARA DESCARGA
-# ---------------------------------------------------------------------
-MODELOS_DISPONIBLES = [
-    "llama3.3",
-    "phi4",
-    "qwq",
-    "llama3.2",
-    "llama3.1",
-    # Añade más modelos
-]
 
 # ---------------------------------------------------------------------
 #   RUTAS DE FLASK
@@ -130,8 +127,8 @@ MODELOS_DISPONIBLES = [
 def index():
     """Página principal."""
     modelos_ollama = listar_modelos_ollama()
-    modelos_disponibles = MODELOS_DISPONIBLES
-    return render_template("index.html", modelos_ollama=modelos_ollama, modelos_disponibles=modelos_disponibles)
+    return render_template("index.html", modelos_ollama=modelos_ollama)
+
 
 @app.route("/descargar_modelo", methods=["POST"])
 def descargar_modelo():
@@ -140,9 +137,9 @@ def descargar_modelo():
     if not nombre_modelo:
         return jsonify({"ok": False, "error": "Nombre de modelo vacío"}), 400
 
-    # Verifica si el modelo está en la lista de modelos disponibles
-    if nombre_modelo not in MODELOS_DISPONIBLES:
-        return jsonify({"ok": False, "error": "Modelo no disponible para descarga."}), 400
+    # Validar el formato del nombre del modelo
+    if not re.match(r'^[a-zA-Z0-9\-_\.]+$', nombre_modelo):
+        return jsonify({"ok": False, "error": "Formato de nombre de modelo inválido."}), 400
 
     ok, mensaje = descargar_modelo_ollama(nombre_modelo)
     if ok:
@@ -184,7 +181,7 @@ def inferencia():
                         response_text += data["response"]
 
                     # Si está 'done', terminamos
-                    if data.ge t("done", False):
+                    if data.get("done", False):
                         break
                 except json.JSONDecodeError as e:
                     print(f"Error al decodificar JSON: {e}")
@@ -224,6 +221,67 @@ def historial():
         registros = cursor.fetchall()
     return render_template("historial.html", registros=registros)
 
+
+@app.route("/listar_modelos", methods=["GET"])
+def listar_modelos():
+    """Retorna la lista de modelos instalados en formato JSON."""
+    modelos_ollama = listar_modelos_ollama()
+    return jsonify(modelos_ollama)
+
+
+@app.route("/buscar_modelo", methods=["POST"])
+def buscar_modelo():
+    """Realiza búsqueda de modelos mediante web scraping en Ollama Search."""
+    data = request.get_json()
+    query = data.get("query", "").strip()
+
+    if not query:
+        return jsonify({"ok": False, "error": "Consulta de búsqueda vacía."}), 400
+
+    try:
+        resultados = realizar_web_scraping(query)
+        return jsonify({"ok": True, "resultados": resultados})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+def realizar_web_scraping(query: str):
+    """
+    Realiza web scraping en Ollama Search para obtener modelos que coincidan con la consulta.
+    Retorna una lista de diccionarios con la información de cada modelo.
+    """
+    url = f"https://ollama.com/search?q={requests.utils.quote(query)}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; Bot/1.0; +http://yourdomain.com/bot)"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise Exception(f"Error al acceder a Ollama Search: {response.status_code}")
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Encontrar todos los enlaces de modelos
+    enlaces_modelos = soup.find_all('a', href=True, class_='group w-full')
+
+    resultados = []
+
+    for enlace in enlaces_modelos:
+        nombre = enlace.find('span', {'x-test-search-response-title': True})
+        descripcion = enlace.find('p', class_='max-w-lg break-words text-neutral-800 text-md')
+
+        if nombre and descripcion:
+            modelo_info = {
+                "nombre": nombre.get_text(strip=True),
+                "descripcion": descripcion.get_text(strip=True),
+                "url": enlace['href']
+            }
+            resultados.append(modelo_info)
+
+    return resultados
+
+
 # ---------------------------------------------------------------------
 #   LÓGICA PARA EJECUTAR 'OLLAMA SERVE' AUTOMÁTICAMENTE
 # ---------------------------------------------------------------------
@@ -249,12 +307,13 @@ def start_ollama_serve():
             print("Servidor Ollama detectado. Continuamos.")
             return serve_process
         except requests.RequestException:
-            print(f"Esperando al servidor Ollama... (intento {i+1}/{max_retries})")
+            print(f"Esperando al servidor Ollama... (intento {i + 1}/{max_retries})")
 
     # Si no arrancó, matamos el proceso y lanzamos error
     print("No se pudo conectar con Ollama serve.")
     serve_process.kill()
     raise RuntimeError("ollama serve no se inició correctamente.")
+
 
 # ---------------------------------------------------------------------
 #   MAIN
@@ -267,5 +326,5 @@ if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
 
     # Al parar Flask, si quieres, matas ollama serve:
-    # serve_proc.terminate()
+    serve_proc.terminate()
     # serve_proc.wait()
