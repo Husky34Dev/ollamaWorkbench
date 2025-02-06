@@ -5,9 +5,11 @@ import sqlite3
 import subprocess
 import requests
 import json
+import shutil
 
 from flask import Flask, render_template, request, jsonify, url_for
 from bs4 import BeautifulSoup
+from werkzeug.utils import redirect
 
 app = Flask(__name__)
 
@@ -152,12 +154,13 @@ def descargar_modelo():
 def inferencia():
     modelo = request.form.get("modelo", "").strip()
     prompt = request.form.get("prompt", "").strip()
+    temperature = float(request.form.get("temperature", 0.7))  # Valor por defecto 0.7
 
     if not modelo or not prompt:
         return jsonify({"error": "Modelo o prompt vacío"}), 400
 
     url = f"{OLLAMA_SERVER_URL}/api/generate"
-    payload = {"model": modelo, "prompt": prompt}
+    payload = {"model": modelo, "prompt": prompt, "options": {"temperature": temperature}}
     response_text = ""  # Variable para acumular la respuesta
 
     try:
@@ -207,6 +210,7 @@ def inferencia():
         "respuesta": response_text,
         "duracion": duracion
     })
+
 
 
 @app.route("/historial")
@@ -283,48 +287,73 @@ def realizar_web_scraping(query: str):
 
 
 # ---------------------------------------------------------------------
-#   LÓGICA PARA EJECUTAR 'OLLAMA SERVE' AUTOMÁTICAMENTE
+#   FUNCIONES AUXILIARES
 # ---------------------------------------------------------------------
+
+def is_ollama_installed():
+    """Verifica si Ollama está instalado en el sistema."""
+    return shutil.which("ollama") is not None
+
+
 def start_ollama_serve():
     """
     Lanza 'ollama serve' en segundo plano con subprocess.Popen.
     Espera hasta que Ollama responda en 127.0.0.1:11434.
     """
-    serve_process = subprocess.Popen(
-        ["ollama", "serve"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-    print("Iniciando ollama serve en segundo plano...")
+    if not is_ollama_installed():
+        print("❌ Ollama no está instalado en tu sistema.")
+        print("Por favor, instala Ollama desde el siguiente enlace:")
+        print("👉 https://github.com/ollama/ollama")
+        exit(1)  # Finaliza la ejecución de la aplicación
 
-    url = f"{OLLAMA_SERVER_URL}/api/generate"
-    max_retries = 20
-    for i in range(max_retries):
-        time.sleep(1)
-        try:
-            # Si da 200, 404, etc., significa que contesta algo
-            requests.get(url, timeout=2)
-            print("Servidor Ollama detectado. Continuamos.")
-            return serve_process
-        except requests.RequestException:
-            print(f"Esperando al servidor Ollama... (intento {i + 1}/{max_retries})")
+    try:
+        serve_process = subprocess.Popen(
+            ["ollama", "serve"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        print("✅ Iniciando 'ollama serve' en segundo plano...")
 
-    # Si no arrancó, matamos el proceso y lanzamos error
-    print("No se pudo conectar con Ollama serve.")
-    serve_process.kill()
-    raise RuntimeError("ollama serve no se inició correctamente.")
+        url = f"{OLLAMA_SERVER_URL}/api/generate"
+        max_retries = 20
+        for i in range(max_retries):
+            time.sleep(1)
+            try:
+                # Si da 200, 404, etc., significa que contesta algo
+                response = requests.get(url, timeout=2)
+                if response.status_code:
+                    print("✅ Servidor Ollama detectado. Continuando con la aplicación.")
+                    return serve_process
+            except requests.RequestException:
+                print(f"⌛ Esperando al servidor Ollama... (intento {i + 1}/{max_retries})")
+
+        # Si no arrancó, matamos el proceso y lanzamos error
+        print("❌ No se pudo conectar con 'ollama serve' después de varios intentos.")
+        serve_process.kill()
+        exit(1)  # Finaliza la ejecución de la aplicación
+
+    except Exception as e:
+        print(f"❌ Error al intentar iniciar 'ollama serve': {e}")
+        exit(1)  # Finaliza la ejecución de la aplicación
 
 
 # ---------------------------------------------------------------------
 #   MAIN
 # ---------------------------------------------------------------------
 if __name__ == "__main__":
-    # Lanza ollama serve en segundo plano y espera que responda
+    # Verifica si Ollama está instalado y arranca el servidor si es así
     serve_proc = start_ollama_serve()
 
-    # Arranca Flask
-    app.run(host="127.0.0.1", port=5000, debug=True)
-
-    # Al parar Flask, si quieres, matas ollama serve:
-    serve_proc.terminate()
-    # serve_proc.wait()
+    try:
+        # Arranca Flask
+        print("🚀 Iniciando la aplicación Flask...")
+        app.run(host="127.0.0.1", port=5000, debug=True)
+    except KeyboardInterrupt:
+        print("\n🛑 Aplicación interrumpida por el usuario.")
+    finally:
+        # Al parar Flask, si quieres, matar ollama serve:
+        if serve_proc.poll() is None:
+            print("🛑 Terminando 'ollama serve'...")
+            serve_proc.terminate()
+            serve_proc.wait()
+        print("✅ Aplicación finalizada correctamente.")

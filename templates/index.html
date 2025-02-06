@@ -2,39 +2,43 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ollama Web UI (Auto-Serve)</title>
+    <title>Ollama Workbench</title>
     <!-- Importar Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Importar Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Importar estilos personalizados -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
     <!-- Meta para responsividad -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Importar estilos de GitHub Markdown para una mejor apariencia -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" integrity="sha512-PH0HBkeemXnH2eI6rX2uYN/K6m5zMX3+m5pqR4D1DXjTeBWJwgV8PRhif+TwXnqXOHimIQZOnIOEXmSgwZ6YwQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css"
+          integrity="sha512-PH0HBkeemXnH2eI6rX2uYN/K6m5zMX3+m5pqR4D1DXjTeBWJwgV8PRhif+TwXnqXOHimIQZOnIOEXmSgwZ6YwQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
 </head>
 <body class="body">
-    <div class="container">
-        <!-- Cabecera -->
-        <header class="header">
-            <h1 class="title">Ollama Web UI</h1>
-            <nav>
-                <a href="{{ url_for('historial') }}" class="btn btn-history">
-                    <i class="fas fa-history"></i> Ver Historial
-                </a>
-            </nav>
-        </header>
+<div class="container">
+    <!-- Cabecera -->
+    <header class="header">
+        <h1 class="title">Ollama Workbench</h1>
+        <nav>
+            <a href="{{ url_for('historial') }}" class="btn btn-history">
+                <i class="fas fa-history"></i> Ver Historial
+            </a>
+        </nav>
+    </header>
 
-        <!-- Contenido Principal -->
-        <main class="main-content">
-            <!-- Sección para descargar modelos con Autocomplete -->
-            <section class="section">
-                <h2 class="section-title">Descargar / Registrar un Modelo</h2>
-                <form id="downloadForm" class="form">
-                    <div class="form-group autocomplete">
-                        <label for="nombre_modelo" class="label">Buscar y Descargar Modelo:</label>
-                        <input
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Sección para descargar modelos con Autocomplete -->
+        <section class="section">
+            <h2 class="section-title">Descargar / Registrar un Modelo</h2>
+            <form id="downloadForm" class="form">
+                <div class="form-group autocomplete">
+                    <label for="nombre_modelo" class="label">Buscar y Descargar Modelo:</label>
+                    <input
                             type="text"
                             id="nombre_modelo"
                             name="nombre_modelo"
@@ -42,315 +46,338 @@
                             required
                             class="input"
                             autocomplete="off"
-                        >
-                        <!-- Lista de sugerencias -->
-                        <ul id="suggestions" class="suggestions hidden">
-                            <!-- Sugerencias dinámicas se insertarán aquí -->
-                        </ul>
-                    </div>
-                    <button type="submit" class="btn btn-download">
-                        <i class="fas fa-download"></i> Descargar
-                    </button>
-                </form>
-                <p id="downloadStatus" class="status"></p>
-            </section>
+                    >
+                    <!-- Lista de sugerencias -->
+                    <ul id="suggestions" class="suggestions hidden">
+                        <!-- Sugerencias dinámicas se insertarán aquí -->
+                    </ul>
+                </div>
+                <button type="submit" class="btn btn-download">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+            </form>
+            <p id="downloadStatus" class="status"></p>
+        </section>
 
-            <!-- Sección para listar modelos instalados -->
-            <section class="section">
-                <h2 class="section-title">Modelos Instalados</h2>
-                <ul id="listaModelos" class="model-list">
-                    {% for mod in modelos_ollama %}
-                    <li class="model-item">
-                        {{ mod }}
-                    </li>
-                    {% endfor %}
-                </ul>
-            </section>
+        <!-- Sección para listar modelos instalados -->
+        <section class="section">
+            <h2 class="section-title">Modelos Instalados</h2>
+            <ul id="listaModelos" class="model-list">
+                {% for mod in modelos_ollama %}
+                <li class="model-item">
+                    {{ mod }}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
 
-            <!-- Sección para enviar prompts -->
-            <section class="section">
-                <h2 class="section-title">Enviar un Prompt</h2>
-                <form id="promptForm" class="form">
-                    <div class="form-group">
-                        <label for="selectModelo" class="label">Modelo:</label>
-                        <select id="selectModelo" required class="select">
-                            {% for mod in modelos_ollama %}
-                            <option value="{{ mod }}">{{ mod }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="prompt" class="label">Prompt:</label>
-                        <textarea
+        <!-- Sección para enviar prompts -->
+        <section class="section">
+            <h2 class="section-title">Enviar un Prompt</h2>
+            <form id="promptForm" class="form">
+                <div class="form-group">
+                    <label for="selectModelo" class="label">Modelo:</label>
+                    <select id="selectModelo" required class="select">
+                        {% for mod in modelos_ollama %}
+                        <option value="{{ mod }}">{{ mod }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="prompt" class="label">Prompt:</label>
+                    <textarea
                             id="prompt"
                             rows="5"
                             placeholder="Escribe tu prompt aquí..."
                             required
                             class="textarea"
-                        ></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-submit">
-                        <i class="fas fa-paper-plane"></i> Enviar Prompt
-                    </button>
-                </form>
-                <div id="spinner" class="spinner hidden">
-                    <!-- Spinner animado -->
-                    <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle
-                          class="spinner-circle"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          stroke-width="4"></circle>
-                      <path
-                          class="spinner-path"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
+                    ></textarea>
+                    <label for="temperature" class="label">Temperatura:</label>
+                    <input
+                            type="range"
+                            id="temperature"
+                            name="temperature"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value="0.7"
+                            class="slider"
+                    >
+                    <span id="temperatureValue">0.7</span>
                 </div>
-                <div id="respuesta" class="markdown-body respuesta"></div>
-            </section>
-        </main>
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-paper-plane"></i> Enviar Prompt
+                </button>
+            </form>
+            <div id="spinner" class="spinner hidden">
+                <!-- Spinner animado -->
+                <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle
+                            class="spinner-circle"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"></circle>
+                    <path
+                            class="spinner-path"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </div>
+            <div id="respuesta" class="markdown-body respuesta"></div>
+        </section>
+    </main>
 
-        <!-- Pie de página -->
-        <footer class="footer">
-            <p>&copy; 2025 Ollama Web UI. Todos los derechos reservados.</p>
-        </footer>
-    </div>
+    <!-- Pie de página -->
+    <footer class="footer">
+        <p>&copy; 2025 Ollama Web UI. Todos los derechos reservados.</p>
+    </footer>
+</div>
 
-    <!-- Importar Font Awesome JS (opcional para interactividad de iconos) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <!-- Importar Marked.js para procesar Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- Scripts de JavaScript -->
-    <script>
-        // Manejo de Autocomplete en la barra de búsqueda de modelos
-        const nombreModeloInput = document.getElementById('nombre_modelo');
-        const suggestionsList = document.getElementById('suggestions');
-        const downloadForm = document.getElementById('downloadForm');
-        const downloadStatus = document.getElementById('downloadStatus');
+<!-- Importar Font Awesome JS (opcional para interactividad de iconos) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<!-- Importar Marked.js para procesar Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        // Debounce para limitar la frecuencia de solicitudes al backend
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), delay);
-            };
+<!-- Scripts de JavaScript -->
+<script>
+    // Manejo de Autocomplete en la barra de búsqueda de modelos
+    const nombreModeloInput = document.getElementById('nombre_modelo');
+    const suggestionsList = document.getElementById('suggestions');
+    const downloadForm = document.getElementById('downloadForm');
+    const downloadStatus = document.getElementById('downloadStatus');
+
+    // Debounce para limitar la frecuencia de solicitudes al backend
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Función para obtener sugerencias del backend
+    async function getSuggestions(query) {
+        if (!query) {
+            suggestionsList.innerHTML = '';
+            suggestionsList.classList.add('hidden');
+            return;
         }
 
-        // Función para obtener sugerencias del backend
-        async function getSuggestions(query) {
-            if (!query) {
-                suggestionsList.innerHTML = '';
-                suggestionsList.classList.add('hidden');
-                return;
-            }
+        try {
+            const response = await fetch("{{ url_for('buscar_modelo') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query: query })
+            });
 
-            try {
-                const response = await fetch("{{ url_for('buscar_modelo') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ query: query })
-                });
+            const data = await response.json();
 
-                const data = await response.json();
-
-                if (data.ok) {
-                    const modelos = data.resultados;
-                    if (modelos.length === 0) {
-                        suggestionsList.innerHTML = '<li class="p-2 text-gray-700">No se encontraron modelos.</li>';
-                    } else {
-                        suggestionsList.innerHTML = modelos.map(modelo => `
-                            <li class="p-2 hover:bg-indigo-100 cursor-pointer" data-modelo="${modelo.nombre}">
-                                ${modelo.nombre}
-                            </li>
-                        `).join('');
-                    }
-                    suggestionsList.classList.remove('hidden');
+            if (data.ok) {
+                const modelos = data.resultados;
+                if (modelos.length === 0) {
+                    suggestionsList.innerHTML = '<li class="p-2 text-gray-700">No se encontraron modelos.</li>';
                 } else {
-                    suggestionsList.innerHTML = `<li class="p-2 text-red-500">${data.error}</li>`;
-                    suggestionsList.classList.remove('hidden');
+                    suggestionsList.innerHTML = modelos.map(modelo => `
+                        <li class="p-2 hover:bg-indigo-100 cursor-pointer" data-modelo="${modelo.nombre}">
+                            ${modelo.nombre}
+                        </li>
+                    `).join('');
                 }
-            } catch (error) {
-                suggestionsList.innerHTML = `<li class="p-2 text-red-500">Error al obtener sugerencias.</li>`;
+                suggestionsList.classList.remove('hidden');
+            } else {
+                suggestionsList.innerHTML = `<li class="p-2 text-red-500">${data.error}</li>`;
                 suggestionsList.classList.remove('hidden');
             }
+        } catch (error) {
+            suggestionsList.innerHTML = `<li class="p-2 text-red-500">Error al obtener sugerencias.</li>`;
+            suggestionsList.classList.remove('hidden');
         }
+    }
 
-        // Evento de entrada en el campo de búsqueda con debounce
-        nombreModeloInput.addEventListener('input', debounce(function(event) {
-            const query = event.target.value.trim();
-            getSuggestions(query);
-        }, 300));
+    // Evento de entrada en el campo de búsqueda con debounce
+    nombreModeloInput.addEventListener('input', debounce(function(event) {
+        const query = event.target.value.trim();
+        getSuggestions(query);
+    }, 300));
 
-        // Manejar clic en una sugerencia
-        suggestionsList.addEventListener('click', function(event) {
-            if (event.target && event.target.matches('li[data-modelo]')) {
-                const modeloSeleccionado = event.target.getAttribute('data-modelo');
-                nombreModeloInput.value = modeloSeleccionado;
-                suggestionsList.innerHTML = '';
-                suggestionsList.classList.add('hidden');
-                // Iniciar la descarga automáticamente
-                iniciarDescarga(modeloSeleccionado);
-            }
-        });
+    // Manejar clic en una sugerencia
+    suggestionsList.addEventListener('click', function(event) {
+        if (event.target && event.target.matches('li[data-modelo]')) {
+            const modeloSeleccionado = event.target.getAttribute('data-modelo');
+            nombreModeloInput.value = modeloSeleccionado;
+            suggestionsList.innerHTML = '';
+            suggestionsList.classList.add('hidden');
+            // Iniciar la descarga automáticamente
+            iniciarDescarga(modeloSeleccionado);
+        }
+    });
 
-        // Función para iniciar la descarga
-        async function iniciarDescarga(modelo) {
-            downloadStatus.textContent = "Descargando, espera...";
-            downloadStatus.classList.remove("text-green-500", "text-red-500", "text-gray-600");
-            downloadStatus.classList.add("text-gray-600");
+    // Función para iniciar la descarga
+    async function iniciarDescarga(modelo) {
+        downloadStatus.textContent = "Descargando, espera...";
+        downloadStatus.classList.remove("text-green-500", "text-red-500", "text-gray-600");
+        downloadStatus.classList.add("text-gray-600");
 
-            const formData = new FormData();
-            formData.append("nombre_modelo", modelo);
+        const formData = new FormData();
+        formData.append("nombre_modelo", modelo);
 
-            try {
-                const resp = await fetch("{{ url_for('descargar_modelo') }}", {
-                    method: "POST",
-                    body: formData
-                });
-                const data = await resp.json();
-                if (resp.ok && data.ok) {
-                    downloadStatus.textContent = "Modelo descargado con éxito.";
-                    downloadStatus.classList.remove("text-gray-600", "text-red-500");
-                    downloadStatus.classList.add("text-green-500");
-                    nombreModeloInput.value = ""; // Limpiar el campo de entrada
-                    actualizarListaModelos(); // Actualizar la lista sin recargar
-                } else {
-                    downloadStatus.textContent = data.error || "Error desconocido.";
-                    downloadStatus.classList.remove("text-gray-600", "text-green-500");
-                    downloadStatus.classList.add("text-red-500");
-                }
-            } catch (error) {
-                downloadStatus.textContent = "Error de red: " + error;
+        try {
+            const resp = await fetch("{{ url_for('descargar_modelo') }}", {
+                method: "POST",
+                body: formData
+            });
+            const data = await resp.json();
+            if (resp.ok && data.ok) {
+                downloadStatus.textContent = "Modelo descargado con éxito.";
+                downloadStatus.classList.remove("text-gray-600", "text-red-500");
+                downloadStatus.classList.add("text-green-500");
+                nombreModeloInput.value = ""; // Limpiar el campo de entrada
+                actualizarListaModelos(); // Actualizar la lista sin recargar
+            } else {
+                downloadStatus.textContent = data.error || "Error desconocido.";
                 downloadStatus.classList.remove("text-gray-600", "text-green-500");
                 downloadStatus.classList.add("text-red-500");
             }
+        } catch (error) {
+            downloadStatus.textContent = "Error de red: " + error;
+            downloadStatus.classList.remove("text-gray-600", "text-green-500");
+            downloadStatus.classList.add("text-red-500");
         }
+    }
 
-        // Cerrar la lista de sugerencias al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            if (!downloadForm.contains(event.target)) {
+    // Cerrar la lista de sugerencias al hacer clic fuera
+    document.addEventListener('click', function(event) {
+        if (!downloadForm.contains(event.target)) {
+            suggestionsList.innerHTML = '';
+            suggestionsList.classList.add('hidden');
+        }
+    });
+
+    // Manejo del formulario de inferencia
+    document.getElementById('promptForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const modelo = document.getElementById("selectModelo").value;
+    const prompt = document.getElementById("prompt").value.trim();
+    const temperature = parseFloat(document.getElementById("temperature").value);
+    const respuestaElem = document.getElementById("respuesta");
+    const spinnerElem = document.getElementById("spinner");
+
+    respuestaElem.innerHTML = ""; // Limpiar contenido anterior
+    respuestaElem.classList.remove("text-red-500", "text-gray-800");
+    if (!modelo || !prompt) {
+        respuestaElem.textContent = "Faltan datos: modelo o prompt vacío.";
+        respuestaElem.classList.add("text-red-500");
+        return;
+    }
+
+    spinnerElem.classList.remove('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append("modelo", modelo);
+        formData.append("prompt", prompt);
+        formData.append("temperature", temperature);
+
+        const resp = await fetch("{{ url_for('inferencia') }}", {
+            method: "POST",
+            body: formData
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+            respuestaElem.textContent = "Error HTTP: " + resp.status;
+            respuestaElem.classList.add("text-red-500");
+        } else if (data.error) {
+            respuestaElem.textContent = "Error: " + data.error;
+            respuestaElem.classList.add("text-red-500");
+        } else {
+            // Usar Marked.js para convertir Markdown a HTML
+            const htmlContent = marked.parse(data.respuesta);
+            respuestaElem.innerHTML = htmlContent +
+    `<p class="mt-2 text-sm text-gray-500"><em>Tiempo de procesamiento: ${data.duracion.toFixed(3)}s</em></p>`;
+
+            respuestaElem.classList.remove("text-red-500");
+        }
+    } catch (error) {
+        respuestaElem.textContent = "Error: " + error;
+        respuestaElem.classList.add("text-red-500");
+    } finally {
+        spinnerElem.classList.add('hidden');
+    }
+});
+
+    // Listener para detectar la tecla Enter en el textarea del prompt
+    document.getElementById('prompt').addEventListener('keydown', function(event) {
+        // Verificamos si la tecla presionada es Enter sin la tecla Shift
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // Previene la inserción de una nueva línea
+            document.getElementById('promptForm').dispatchEvent(new Event('submit')); // Envía el formulario
+        }
+    });
+
+    // Función para actualizar la lista de modelos instalados sin recargar la página
+    async function actualizarListaModelos() {
+        try {
+            const resp = await fetch("{{ url_for('listar_modelos') }}");
+            if (!resp.ok) throw new Error("Error al obtener la lista de modelos.");
+            const modelos = await resp.json();
+            const listaModelosElem = document.getElementById("listaModelos");
+            listaModelosElem.innerHTML = ""; // Limpiar la lista actual
+
+            modelos.forEach(mod => {
+                const li = document.createElement("li");
+                li.className = "model-item";
+                li.textContent = mod;
+                listaModelosElem.appendChild(li);
+            });
+
+            // Actualizar el selector de modelos en el formulario de prompt
+            const selectModeloElem = document.getElementById("selectModelo");
+            selectModeloElem.innerHTML = ""; // Limpiar opciones actuales
+            modelos.forEach(mod => {
+                const option = document.createElement("option");
+                option.value = mod;
+                option.textContent = mod;
+                selectModeloElem.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error("Error al actualizar la lista de modelos:", error);
+        }
+    }
+
+    // Manejo de Autocomplete en el campo de búsqueda
+    nombreModeloInput.addEventListener('input', debounce(function(event) {
+        const query = event.target.value.trim();
+        getSuggestions(query);
+    }, 300));
+
+    // Manejar Enter en el campo de búsqueda
+    nombreModeloInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevenir la recarga de la página
+            const modelo = nombreModeloInput.value.trim();
+            if (modelo) {
+                iniciarDescarga(modelo);
+                // Cerrar la lista de sugerencias
                 suggestionsList.innerHTML = '';
                 suggestionsList.classList.add('hidden');
-            }
-        });
+                nombreModeloInput.blur(); // Quitar el focus
 
-        // Manejo del formulario de inferencia
-        document.getElementById('promptForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const modelo = document.getElementById("selectModelo").value;
-            const prompt = document.getElementById("prompt").value.trim();
-            const respuestaElem = document.getElementById("respuesta");
-            const spinnerElem = document.getElementById("spinner");
-
-            respuestaElem.innerHTML = ""; // Limpiar contenido anterior
-            respuestaElem.classList.remove("text-red-500", "text-gray-800");
-            if (!modelo || !prompt) {
-                respuestaElem.textContent = "Faltan datos: modelo o prompt vacío.";
-                respuestaElem.classList.add("text-red-500");
-                return;
-            }
-
-            spinnerElem.classList.remove('hidden');
-
-            try {
-                const formData = new FormData();
-                formData.append("modelo", modelo);
-                formData.append("prompt", prompt);
-
-                const resp = await fetch("{{ url_for('inferencia') }}", {
-                    method: "POST",
-                    body: formData
-                });
-                const data = await resp.json();
-                if (!resp.ok) {
-                    respuestaElem.textContent = "Error HTTP: " + resp.status;
-                    respuestaElem.classList.add("text-red-500");
-                } else if (data.error) {
-                    respuestaElem.textContent = "Error: " + data.error;
-                    respuestaElem.classList.add("text-red-500");
-                } else {
-                    // Usar Marked.js para convertir Markdown a HTML
-                    const htmlContent = marked.parse(data.respuesta);
-                    respuestaElem.innerHTML = htmlContent +
-                        `<p class="mt-2 text-sm text-gray-500"><em>Tiempo de procesamiento: ${data.duracion.toFixed(3)}s</em></p>`;
-                    respuestaElem.classList.remove("text-red-500");
-                }
-            } catch (error) {
-                respuestaElem.textContent = "Error: " + error;
-                respuestaElem.classList.add("text-red-500");
-            } finally {
-                spinnerElem.classList.add('hidden');
-            }
-        });
-
-        // Listener para detectar la tecla Enter en el textarea del prompt
-        document.getElementById('prompt').addEventListener('keydown', function(event) {
-            // Verificamos si la tecla presionada es Enter sin la tecla Shift
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); // Previene la inserción de una nueva línea
-                document.getElementById('promptForm').dispatchEvent(new Event('submit')); // Envía el formulario
-            }
-        });
-
-        // Función para actualizar la lista de modelos instalados sin recargar la página
-        async function actualizarListaModelos() {
-            try {
-                const resp = await fetch("{{ url_for('listar_modelos') }}");
-                if (!resp.ok) throw new Error("Error al obtener la lista de modelos.");
-                const modelos = await resp.json();
-                const listaModelosElem = document.getElementById("listaModelos");
-                listaModelosElem.innerHTML = ""; // Limpiar la lista actual
-
-                modelos.forEach(mod => {
-                    const li = document.createElement("li");
-                    li.className = "model-item";
-                    li.textContent = mod;
-                    listaModelosElem.appendChild(li);
-                });
-
-                // Actualizar el selector de modelos en el formulario de prompt
-                const selectModeloElem = document.getElementById("selectModelo");
-                selectModeloElem.innerHTML = ""; // Limpiar opciones actuales
-                modelos.forEach(mod => {
-                    const option = document.createElement("option");
-                    option.value = mod;
-                    option.textContent = mod;
-                    selectModeloElem.appendChild(option);
-                });
-
-            } catch (error) {
-                console.error("Error al actualizar la lista de modelos:", error);
             }
         }
+    });
+    // Actualizar el valor mostrado del slider de temperatura
+    const temperatureSlider = document.getElementById('temperature');
+    const temperatureValue = document.getElementById('temperatureValue');
 
-        // Manejo de Autocomplete en el campo de búsqueda
-        nombreModeloInput.addEventListener('input', debounce(function(event) {
-            const query = event.target.value.trim();
-            getSuggestions(query);
-        }, 300));
-
-        // Manejar Enter en el campo de búsqueda
-        nombreModeloInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevenir la recarga de la página
-                const modelo = nombreModeloInput.value.trim();
-                if (modelo) {
-                    iniciarDescarga(modelo);
-                    // Cerrar la lista de sugerencias
-                    suggestionsList.innerHTML = '';
-                    suggestionsList.classList.add('hidden');
-                    nombreModeloInput.blur(); // Quitar el focus
-
-                }
-            }
-        });
-    </script>
+    temperatureSlider.addEventListener('input', function() {
+        temperatureValue.textContent = this.value;
+    });
+</script>
 </body>
 </html>
