@@ -1,3 +1,5 @@
 Flask
 requests
 bs4
+python-dotenv
+docker

@@ -135,21 +135,23 @@
     </footer>
 </div>
 
-
 <!-- Importar Font Awesome JS (opcional para interactividad de iconos) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 <!-- Importar Marked.js para procesar Markdown -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 <!-- Scripts de JavaScript -->
 <script>
-    // Manejo de Autocomplete en la barra de búsqueda de modelos
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOMContentLoaded ejecutado"); // Para verificar que el evento se dispara
+    console.log("Tipo de marked:", typeof marked); // Debe imprimir "function"
+
+    // Manejo de Autocomplete
     const nombreModeloInput = document.getElementById('nombre_modelo');
     const suggestionsList = document.getElementById('suggestions');
     const downloadForm = document.getElementById('downloadForm');
     const downloadStatus = document.getElementById('downloadStatus');
 
-    // Debounce para limitar la frecuencia de solicitudes al backend
+    // Debounce
     function debounce(func, delay) {
         let timeout;
         return function(...args) {
@@ -158,7 +160,7 @@
         };
     }
 
-    // Función para obtener sugerencias del backend
+    // Obtener sugerencias
     async function getSuggestions(query) {
         if (!query) {
             suggestionsList.innerHTML = '';
@@ -169,9 +171,7 @@
         try {
             const response = await fetch("{{ url_for('buscar_modelo') }}", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ query: query })
             });
 
@@ -179,15 +179,13 @@
 
             if (data.ok) {
                 const modelos = data.resultados;
-                if (modelos.length === 0) {
-                    suggestionsList.innerHTML = '<li class="p-2 text-gray-700">No se encontraron modelos.</li>';
-                } else {
-                    suggestionsList.innerHTML = modelos.map(modelo => `
+                suggestionsList.innerHTML = modelos.length === 0
+                  ? '<li class="p-2 text-gray-700">No se encontraron modelos.</li>'
+                  : modelos.map(modelo => `
                         <li class="p-2 hover:bg-indigo-100 cursor-pointer" data-modelo="${modelo.nombre}">
                             ${modelo.nombre}
                         </li>
                     `).join('');
-                }
                 suggestionsList.classList.remove('hidden');
             } else {
                 suggestionsList.innerHTML = `<li class="p-2 text-red-500">${data.error}</li>`;
@@ -199,25 +197,23 @@
         }
     }
 
-    // Evento de entrada en el campo de búsqueda con debounce
-    nombreModeloInput.addEventListener('input', debounce(function(event) {
+    // Eventos Autocomplete
+    nombreModeloInput.addEventListener('input', debounce(event => {
         const query = event.target.value.trim();
         getSuggestions(query);
     }, 300));
 
-    // Manejar clic en una sugerencia
-    suggestionsList.addEventListener('click', function(event) {
+    suggestionsList.addEventListener('click', event => {
         if (event.target && event.target.matches('li[data-modelo]')) {
             const modeloSeleccionado = event.target.getAttribute('data-modelo');
             nombreModeloInput.value = modeloSeleccionado;
             suggestionsList.innerHTML = '';
             suggestionsList.classList.add('hidden');
-            // Iniciar la descarga automáticamente
             iniciarDescarga(modeloSeleccionado);
         }
     });
 
-    // Función para iniciar la descarga
+    // Descargar modelo
     async function iniciarDescarga(modelo) {
         downloadStatus.textContent = "Descargando, espera...";
         downloadStatus.classList.remove("text-green-500", "text-red-500", "text-gray-600");
@@ -231,153 +227,73 @@
                 method: "POST",
                 body: formData
             });
-            const data = await resp.json();
-            if (resp.ok && data.ok) {
-                downloadStatus.textContent = "Modelo descargado con éxito.";
-                downloadStatus.classList.remove("text-gray-600", "text-red-500");
-                downloadStatus.classList.add("text-green-500");
-                nombreModeloInput.value = ""; // Limpiar el campo de entrada
-                actualizarListaModelos(); // Actualizar la lista sin recargar
-            } else {
-                downloadStatus.textContent = data.error || "Error desconocido.";
-                downloadStatus.classList.remove("text-gray-600", "text-green-500");
-                downloadStatus.classList.add("text-red-500");
-            }
+
+            const result = await resp.json();
+            downloadStatus.textContent = result.ok
+              ? `Modelo ${modelo} descargado correctamente.`
+              : `Error: ${result.error}`;
+            downloadStatus.classList.toggle("text-green-500", result.ok);
+            downloadStatus.classList.toggle("text-red-500",!result.ok);
+
         } catch (error) {
-            downloadStatus.textContent = "Error de red: " + error;
-            downloadStatus.classList.remove("text-gray-600", "text-green-500");
+            downloadStatus.textContent = `Error al descargar el modelo.`;
             downloadStatus.classList.add("text-red-500");
         }
     }
 
-    // Cerrar la lista de sugerencias al hacer clic fuera
-    document.addEventListener('click', function(event) {
-        if (!downloadForm.contains(event.target)) {
-            suggestionsList.innerHTML = '';
-            suggestionsList.classList.add('hidden');
-        }
-    });
+    // Formulario de prompts
+    const promptForm = document.getElementById('promptForm');
+    const spinner = document.getElementById('spinner');
+    const respuestaDiv = document.getElementById('respuesta');
+    const temperatureValue = document.getElementById('temperatureValue');
+    const temperatureSlider = document.getElementById('temperature');
+    
 
-    // Manejo del formulario de inferencia
-    document.getElementById('promptForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const modelo = document.getElementById("selectModelo").value;
-    const prompt = document.getElementById("prompt").value.trim();
-    const temperature = parseFloat(document.getElementById("temperature").value);
-    const respuestaElem = document.getElementById("respuesta");
-    const spinnerElem = document.getElementById("spinner");
+promptForm.addEventListener('submit', async event => {
+    event.preventDefault(); // También necesario en el submit
 
-    respuestaElem.innerHTML = ""; // Limpiar contenido anterior
-    respuestaElem.classList.remove("text-red-500", "text-gray-800");
-    if (!modelo || !prompt) {
-        respuestaElem.textContent = "Faltan datos: modelo o prompt vacío.";
-        respuestaElem.classList.add("text-red-500");
-        return;
-    }
+        const selectModelo = document.getElementById('selectModelo');
+        const promptInput = document.getElementById('prompt');
+        const temperature = temperatureSlider.value;
 
-    spinnerElem.classList.remove('hidden');
+        spinner.classList.remove('hidden');
+        respuestaDiv.innerHTML = '';
 
-    try {
+        const modelo = selectModelo.value;
+        const prompt = promptInput.value;
+
         const formData = new FormData();
         formData.append("modelo", modelo);
         formData.append("prompt", prompt);
         formData.append("temperature", temperature);
 
-        const resp = await fetch("{{ url_for('inferencia') }}", {
-            method: "POST",
-            body: formData
-        });
-        const data = await resp.json();
-        if (!resp.ok) {
-            respuestaElem.textContent = "Error HTTP: " + resp.status;
-            respuestaElem.classList.add("text-red-500");
-        } else if (data.error) {
-            respuestaElem.textContent = "Error: " + data.error;
-            respuestaElem.classList.add("text-red-500");
-        } else {
-            // Usar Marked.js para convertir Markdown a HTML
-            const htmlContent = marked.parse(data.respuesta);
-            respuestaElem.innerHTML = htmlContent +
-    `<p class="mt-2 text-sm text-gray-500"><em>Tiempo de procesamiento: ${data.duracion.toFixed(3)}s</em></p>`;
-
-            respuestaElem.classList.remove("text-red-500");
-        }
-    } catch (error) {
-        respuestaElem.textContent = "Error: " + error;
-        respuestaElem.classList.add("text-red-500");
-    } finally {
-        spinnerElem.classList.add('hidden');
-    }
-});
-
-    // Listener para detectar la tecla Enter en el textarea del prompt
-    document.getElementById('prompt').addEventListener('keydown', function(event) {
-        // Verificamos si la tecla presionada es Enter sin la tecla Shift
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault(); // Previene la inserción de una nueva línea
-            document.getElementById('promptForm').dispatchEvent(new Event('submit')); // Envía el formulario
-        }
-    });
-
-    // Función para actualizar la lista de modelos instalados sin recargar la página
-    async function actualizarListaModelos() {
         try {
-            const resp = await fetch("{{ url_for('listar_modelos') }}");
-            if (!resp.ok) throw new Error("Error al obtener la lista de modelos.");
-            const modelos = await resp.json();
-            const listaModelosElem = document.getElementById("listaModelos");
-            listaModelosElem.innerHTML = ""; // Limpiar la lista actual
-
-            modelos.forEach(mod => {
-                const li = document.createElement("li");
-                li.className = "model-item";
-                li.textContent = mod;
-                listaModelosElem.appendChild(li);
+            const resp = await fetch("{{ url_for('inferencia') }}", {
+                method: "POST",
+                body: formData
             });
 
-            // Actualizar el selector de modelos en el formulario de prompt
-            const selectModeloElem = document.getElementById("selectModelo");
-            selectModeloElem.innerHTML = ""; // Limpiar opciones actuales
-            modelos.forEach(mod => {
-                const option = document.createElement("option");
-                option.value = mod;
-                option.textContent = mod;
-                selectModeloElem.appendChild(option);
-            });
+            if (!resp.ok) {
+                const errorData = await resp.json();
+                throw new Error(errorData.error || `Error en la solicitud: ${resp.status}`);
+            }
+
+            const result = await resp.json();
+            spinner.classList.add('hidden');
+            respuestaDiv.innerHTML = marked.parse((result.respuesta)); // Usa marked() aquí
 
         } catch (error) {
-            console.error("Error al actualizar la lista de modelos:", error);
-        }
-    }
-
-    // Manejo de Autocomplete en el campo de búsqueda
-    nombreModeloInput.addEventListener('input', debounce(function(event) {
-        const query = event.target.value.trim();
-        getSuggestions(query);
-    }, 300));
-
-    // Manejar Enter en el campo de búsqueda
-    nombreModeloInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevenir la recarga de la página
-            const modelo = nombreModeloInput.value.trim();
-            if (modelo) {
-                iniciarDescarga(modelo);
-                // Cerrar la lista de sugerencias
-                suggestionsList.innerHTML = '';
-                suggestionsList.classList.add('hidden');
-                nombreModeloInput.blur(); // Quitar el focus
-
-            }
+            spinner.classList.add('hidden');
+            respuestaDiv.innerHTML = `<p class="text-red-500">${error.message}</p>`;
+            console.error("Error:", error);
         }
     });
-    // Actualizar el valor mostrado del slider de temperatura
-    const temperatureSlider = document.getElementById('temperature');
-    const temperatureValue = document.getElementById('temperatureValue');
 
-    temperatureSlider.addEventListener('input', function() {
-        temperatureValue.textContent = this.value;
+    temperatureSlider.addEventListener('input', () => {
+        temperatureValue.textContent = temperatureSlider.value;
     });
+
+}); // Fin de DOMContentLoaded
 </script>
 </body>
 </html>
