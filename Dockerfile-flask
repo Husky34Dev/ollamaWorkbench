@@ -7,20 +7,19 @@ RUN apt-get update && apt-get install -y \
     && curl -sSL https://ollama.com/install.sh | bash \
     && apt-get clean
 
-# Asegurar que el directorio de instalación de Ollama está en el PATH
 ENV PATH="/root/.local/bin:${PATH}"
 
-# Crear y configurar el entorno de trabajo
+# Entorno de trabajo
 WORKDIR /app
 
 # Copiar los archivos del proyecto al contenedor
 COPY . .
 
-# Instalar dependencias de Python desde requirements.txt
+# requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Exponer el puerto de Flask
 EXPOSE 5001
 
-# Comando para ejecutar la aplicación Flask
+# Comando para ejecutar la app
 CMD ["python", "app.py"]

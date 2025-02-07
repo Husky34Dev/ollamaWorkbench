@@ -26,6 +26,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock  # Solo si necesitas Docker dentro del contenedor Flask
       - models:/app/models  # Monta el volumen de modelos
       - db_data:/app/data
+      - ./static:/app/static  
+      - ./templates:/app/templates
     networks:
       - my-network  # Usa la misma red que Ollama
 

@@ -88,7 +88,8 @@ body {
     border-radius: 4px; /* rounded-md */
     outline: none;
     transition: border-color 0.3s, box-shadow 0.3s;
-    width: 100%;
+    width: 97.5%;
+    resize: none;
 }
 
 .input:focus,
@@ -143,25 +144,28 @@ body {
 }
 
 .btn-download {
-    background-color: #4f46e5; /* bg-indigo-600 */
+    background-color: #ffaf02; /* bg-indigo-600 */
+    width: 10%;
+    padding: 20px;
+    justify-content: center;
 }
 
 .btn-download:hover {
-    background-color: #4338ca; /* hover:bg-indigo-700 */
+    background-color: #ffaf02b7; 
 }
 
 .btn-submit {
-    background-color: #4f46e5; /* bg-indigo-600 */
+    background-color: #4f46e5; 
 }
 
 .btn-submit:hover {
-    background-color: #4338ca; /* hover:bg-indigo-700 */
+    background-color: #4338ca; 
 }
 
 .status {
-    margin-top: 8px; /* mt-2 */
-    font-size: 0.875rem; /* text-sm */
-    color: #6b7280; /* text-gray-600 */
+    margin-top: 8px; 
+    font-size: 0.875rem;
+    color: #6b7280;
 }
 
 .model-list {
@@ -244,11 +248,13 @@ body {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #d1d5db; /* border-gray-300 */
+
 }
 
 .table th {
     font-weight: 600;
     color: #4b5563; /* text-gray-700 */
+
 }
 
 .table tbody tr:hover {
@@ -278,6 +284,7 @@ body {
     .table, .table tbody, .table tr, .table td {
         display: block;
         width: 100%;
+        border-radius: 10px;
     }
 
     .table tr {
