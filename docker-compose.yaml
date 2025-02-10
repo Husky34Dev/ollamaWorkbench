@@ -3,14 +3,14 @@ version: "3.9"
 services:
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama  # No es estrictamente necesario, pero ayuda a identificarlo
+    container_name: ollama  # Ayuda a identificarlo
     ports:
-      - "11434:11434"  # Solo si necesitas acceso externo a Ollama
+      - "11434:11434"  # Puerto de ollama
     volumes:
       - ollama_data:/root/.ollama  # Volumen para datos de Ollama
       - models:/app/models      # Volumen para los modelos
     networks:
-      - my-network  # Usa la misma red para ambos contenedores
+      - my-network  #  Misma red para ambos contenedores
 
   flask:
     build:
@@ -23,8 +23,8 @@ services:
     environment:
       OLLAMA_URL: http://ollama:11434  # Usa el nombre del servicio 'ollama'
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  # Solo si necesitas Docker dentro del contenedor Flask
-      - models:/app/models  # Monta el volumen de modelos
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker dentro del contenedor Flask
+      - models:/app/models  # Montar los volúmenes
       - db_data:/app/data
       - ./static:/app/static  
       - ./templates:/app/templates
@@ -32,7 +32,7 @@ services:
       - my-network  # Usa la misma red que Ollama
 
 networks:
-  my-network:  # Define la red (puede ser 'bridge' o 'overlay' si es multi-host)
+  my-network:  #
 
 volumes:
   ollama_data:  # Volumen para datos de Ollama
