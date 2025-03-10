@@ -70,33 +70,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Descargar modelo
-    async function iniciarDescarga(modelo) {
-        downloadStatus.textContent = "Descargando, espera...";
-        downloadStatus.classList.remove("text-green-500", "text-red-500", "text-gray-600");
-        downloadStatus.classList.add("text-gray-600");
+   async function iniciarDescarga(modelo) {
+    downloadStatus.textContent = "Descargando, espera...";
+    downloadStatus.classList.remove("text-green-500", "text-red-500", "text-gray-600");
+    downloadStatus.classList.add("text-gray-600");
 
-        const formData = new FormData();
-        formData.append("nombre_modelo", modelo);
+    const formData = new FormData();
+    formData.append("nombre_modelo", modelo);
 
-        try {
-            const resp = await fetch(window.endpoints.descargarModelo, {
-                method: "POST",
-                body: formData
-            });
+    try {
+        const resp = await fetch(window.endpoints.descargarModelo, {
+            method: "POST",
+            body: formData
+        });
 
-            const result = await resp.json();
-            downloadStatus.textContent = result.ok
-              ? `Modelo ${modelo} descargado correctamente.`
-              : `Error: ${result.error}`;
-            downloadStatus.classList.toggle("text-green-500", result.ok);
-            downloadStatus.classList.toggle("text-red-500", !result.ok);
+        const result = await resp.json();
+        console.log("Respuesta JSON:", result);
 
-        } catch (error) {
-            downloadStatus.textContent = `Error al descargar el modelo.`;
+        // Verifica si la API envió un mensaje de éxito
+        if (result.message) {
+            downloadStatus.textContent = result.message;
+            downloadStatus.classList.add("text-green-500");
+        } else {
+            downloadStatus.textContent = "Error: No se recibió respuesta válida.";
             downloadStatus.classList.add("text-red-500");
         }
+    } catch (error) {
+        console.error("Error en la descarga:", error);
+        downloadStatus.textContent = `Error al descargar el modelo.`;
+        downloadStatus.classList.add("text-red-500");
     }
+}
+
+
 
     // Formulario de prompts
     const promptForm = document.getElementById('promptForm');
